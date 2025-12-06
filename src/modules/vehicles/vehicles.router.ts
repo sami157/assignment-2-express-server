@@ -1,8 +1,10 @@
 import { Router } from 'express';
-import { createVehicle } from './vehicles.controller';
+import { createVehicle, getAllVehicles } from './vehicles.controller';
 
 const router = Router();
 
+router.get('/', getAllVehicles)
 router.post('/', createVehicle);
+
 
 export const vehicleRouter = router;

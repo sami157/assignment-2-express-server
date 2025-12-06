@@ -1,5 +1,5 @@
 import { Response } from "express";
-const sendResponse = (res: Response,code: any, success: Boolean, message: String, errors: String, data = []) => {
+const sendResponse = (res: Response,code: any, success: Boolean, message: String, errors: String, data: any) => {
     let response = {}
     success ? response = {
         success: true,

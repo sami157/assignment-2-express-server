@@ -1,7 +1,13 @@
 import { pool } from '../../database/db';
 
 
-// Create new vehicle
+
+export async function getAllVehiclesfromDB() {
+    const result = await pool.query('SELECT * FROM vehicles;');
+    return result.rows;
+}
+
+
 export async function createVehicletoDB(data: Record<string, unknown>) {
     const { vehicle_name, type, registration_number, daily_rent_price, availability_status } = data;
 
@@ -16,3 +22,5 @@ export async function createVehicletoDB(data: Record<string, unknown>) {
 
     return result.rows[0];
 }
+
+
