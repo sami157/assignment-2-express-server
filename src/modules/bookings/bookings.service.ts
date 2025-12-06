@@ -170,3 +170,25 @@ export async function getBookingByIdFromDB(id: number) {
   );
   return result.rows[0];
 }
+
+export async function autoReturnExpiredBookings() {
+    const result = await pool.query(
+        `
+        UPDATE bookings
+        SET status = 'returned'
+        WHERE status = 'active'
+        AND rent_end_date < NOW()
+        RETURNING id, vehicle_id;
+        `
+    );
+
+    for (const row of result.rows) {
+        await pool.query(
+            `UPDATE vehicles SET availability_status = 'available' WHERE id = $1`,
+            [row.vehicle_id]
+        );
+    }
+
+    return result.rows.length;
+}
+

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { createBookingInDB, getAllBookingsFromDB, getBookingByIdFromDB, getBookingsByCustomerFromDB, updateBookingStatusInDB } from './bookings.service';
+import { autoReturnExpiredBookings, createBookingInDB, getAllBookingsFromDB, getBookingByIdFromDB, getBookingsByCustomerFromDB, updateBookingStatusInDB } from './bookings.service';
 import sendResponse from '../../config/sendResponse';
 
 export async function createBooking(req: Request, res: Response) {
@@ -12,10 +12,11 @@ export async function createBooking(req: Request, res: Response) {
 }
 
 export async function getAllBookings(req: Request, res: Response) {
-  try {
+    try {
     const userId = req.user?.id;
     const role = req.user?.role;
 
+    await autoReturnExpiredBookings();
     let bookings;
 
     if (role === "admin") {
@@ -33,12 +34,13 @@ export async function getAllBookings(req: Request, res: Response) {
 
 
 export async function updateBooking(req: Request, res: Response) {
-  try {
+    try {
     const bookingId = Number(req.params.bookingId);
     const userId = req.user?.id;
     const role = req.user?.role;
     const { status } = req.body;
 
+    await autoReturnExpiredBookings();
     const booking = await getBookingByIdFromDB(bookingId);
 
     if (!booking) {
