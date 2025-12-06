@@ -1,13 +1,6 @@
 import { pool } from '../../database/db';
 
 
-
-export async function getAllVehiclesfromDB() {
-    const result = await pool.query('SELECT * FROM vehicles;');
-    return result.rows;
-}
-
-
 export async function createVehicletoDB(data: Record<string, unknown>) {
     const { vehicle_name, type, registration_number, daily_rent_price, availability_status } = data;
 
@@ -23,4 +16,25 @@ export async function createVehicletoDB(data: Record<string, unknown>) {
     return result.rows[0];
 }
 
+export async function getAllVehiclesfromDB() {
+    const result = await pool.query('SELECT * FROM vehicles;');
+    return result.rows;
+}
 
+
+export async function getSingleVehiclefromDB(id: number) {
+    const result = await pool.query(
+        `SELECT * FROM vehicles WHERE id = $1;`,
+        [id]
+    );
+    return result.rows[0];
+}
+
+export async function deleteVehicleFromDB(id: number) {
+    const result = await pool.query(
+        `DELETE FROM vehicles WHERE id = $1 RETURNING id;`,
+        [id]
+    );
+
+    return result.rows[0]; // undefined = not found
+}

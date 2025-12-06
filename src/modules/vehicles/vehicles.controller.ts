@@ -1,6 +1,16 @@
 import { Request, Response } from 'express';
-import {createVehicletoDB, getAllVehiclesfromDB} from './vehicles.service';
+import {createVehicletoDB, deleteVehicleFromDB, getAllVehiclesfromDB, getSingleVehiclefromDB} from './vehicles.service';
 import sendResponse from '../../config/sendResponse';
+
+
+export async function createVehicle(req: Request, res: Response) {
+    try {
+        const newVehicle = await createVehicletoDB(req.body);
+        sendResponse(res, 201, true, "Vehicle created successfully",'',newVehicle)
+    } catch (error: any) {
+        sendResponse(res, 500, false, "Failed to add new vehicle",error.message,[])
+    }
+}
 
 export async function getAllVehicles(req: Request, res: Response) {
     try {
@@ -11,11 +21,31 @@ export async function getAllVehicles(req: Request, res: Response) {
     }
 }
 
-export async function createVehicle(req: Request, res: Response) {
+export async function getSingleVehicle(req: Request, res: Response) {
     try {
-        const newVehicle = await createVehicletoDB(req.body);
-        sendResponse(res, 201, true, "Vehicle created successfully",'',newVehicle)
+        const id = Number(req.params.vehicleId);
+        const vehicle = await getSingleVehiclefromDB(id);
+
+        if (!vehicle) {
+            return sendResponse(res, 404, false, "Vehicle not found", '', []);
+        }
+        sendResponse(res, 200, true, "Vehicle details fetched successfully", '', vehicle);
     } catch (error: any) {
-        sendResponse(res, 500, false, "Failed to add new vehicle",error.message,[])
+        sendResponse(res, 500, false, "Failed fetching vehicle", error.message, []);
+    }
+}
+
+export async function deleteVehicle(req: Request, res: Response) {
+    try {
+        const id = Number(req.params.vehicleId);
+        const deleted = await deleteVehicleFromDB(id);
+
+        if (!deleted) {
+            return sendResponse(res, 404, false, "Vehicle not found", '', []);
+        }
+
+        sendResponse(res, 200, true, "Vehicle deleted successfully", '', []);
+    } catch (error: any) {
+        sendResponse(res, 500, false, "Failed to delete vehicle", error.message, []);
     }
 }
