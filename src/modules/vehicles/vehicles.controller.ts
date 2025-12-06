@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import {createVehicletoDB, deleteVehicleFromDB, getAllVehiclesfromDB, getSingleVehiclefromDB} from './vehicles.service';
+import {createVehicletoDB, deleteVehicleFromDB, getAllVehiclesfromDB, getSingleVehiclefromDB, updateVehicleInDB} from './vehicles.service';
 import sendResponse from '../../config/sendResponse';
 
 
@@ -47,5 +47,20 @@ export async function deleteVehicle(req: Request, res: Response) {
         sendResponse(res, 200, true, "Vehicle deleted successfully", '', []);
     } catch (error: any) {
         sendResponse(res, 500, false, "Failed to delete vehicle", error.message, []);
+    }
+}
+
+export async function updateVehicle(req: Request, res: Response) {
+    try {
+        const id = Number(req.params.vehicleId);
+        const updatedVehicle = await updateVehicleInDB(id, req.body);
+
+        if (!updatedVehicle) {
+            return sendResponse(res, 404, false, "Vehicle not found", '', []);
+        }
+
+        sendResponse(res, 200, true, "Vehicle updated successfully", '', updatedVehicle);
+    } catch (error: any) {
+        sendResponse(res, 500, false, "Failed to update vehicle", error.message, []);
     }
 }

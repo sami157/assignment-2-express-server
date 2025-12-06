@@ -36,5 +36,26 @@ export async function deleteVehicleFromDB(id: number) {
         [id]
     );
 
-    return result.rows[0]; // undefined = not found
+    return result.rows[0];
+}
+
+export async function updateVehicleInDB(id: number, data: Record<string, unknown>) {
+    const { vehicle_name, type, registration_number, daily_rent_price, availability_status } = data;
+
+    const result = await pool.query(
+        `
+        UPDATE vehicles
+        SET 
+            vehicle_name = $1,
+            type = $2,
+            registration_number = $3,
+            daily_rent_price = $4,
+            availability_status = $5
+        WHERE id = $6
+        RETURNING *;
+        `,
+        [vehicle_name, type, registration_number, daily_rent_price, availability_status, id]
+    );
+
+    return result.rows[0];
 }
