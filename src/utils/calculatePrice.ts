@@ -1,4 +1,4 @@
-const calculateTotalPrice = (startDate: string, endDate: string, dailyRent: number) => {
+export const calculateTotalPrice = (startDate: string, endDate: string, dailyRent: number) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
 
