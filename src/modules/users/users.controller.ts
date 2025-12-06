@@ -15,6 +15,9 @@ export async function getAllUsers(req: Request, res: Response) {
 export async function updateUser(req: Request, res: Response) {
     try {
         const id = Number(req.params.userId);
+        if (req.user?.role === "customer" && req.user.id !== id) {
+      return sendResponse(res,403,false,"Forbidden","You can only update your own profile",[]);
+    }
         const updatedUser = await updateUserInDB(id, req.body);
 
         if (!updatedUser) {
