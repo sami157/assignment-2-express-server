@@ -12,3 +12,5 @@ const sendResponse = (res: Response,code: any, success: Boolean, message: String
     }
     return res.status(code).json(response)
 }
+
+export default sendResponse
