@@ -35,3 +35,11 @@ export async function deleteUserFromDB(id: number) {
 
     return result.rows[0];
 }
+
+export async function userHasActiveBookings(userId: number) {
+    const result = await pool.query(
+        `SELECT id FROM bookings WHERE customer_id = $1 AND status = 'active'`,
+        [userId]
+    );
+    return result.rows.length > 0;
+}

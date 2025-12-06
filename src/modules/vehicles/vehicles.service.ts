@@ -59,3 +59,11 @@ export async function updateVehicleInDB(id: number, data: Record<string, unknown
 
     return result.rows[0];
 }
+
+export async function vehicleHasActiveBookings(vehicleId: number) {
+    const result = await pool.query(
+        `SELECT id FROM bookings WHERE vehicle_id = $1 AND status = 'active'`,
+        [vehicleId]
+    );
+    return result.rows.length > 0;
+}

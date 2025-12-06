@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { deleteUserFromDB, getAllUsersFromDB, updateUserInDB } from './users.service';
+import { deleteUserFromDB, getAllUsersFromDB, updateUserInDB, userHasActiveBookings } from './users.service';
 
 import sendResponse from '../../config/sendResponse';
 
@@ -32,14 +32,20 @@ export async function updateUser(req: Request, res: Response) {
 
 export async function deleteUser(req: Request, res: Response) {
     try {
-        const id = Number(req.params.userId);
-        const deleted = await deleteUserFromDB(id);
-
-        if (!deleted) {
-            return sendResponse(res, 404, false, 'User not found', '', []);
+        const userId = Number(req.params.userId);
+        const hasActive = await userHasActiveBookings(userId);
+        
+        if (hasActive) {
+            return sendResponse(res,400,false,"Cannot delete user with active bookings","",[]);
         }
-        sendResponse(res, 200, true, 'User deleted successfully', '', []);
+
+        const deleted = await deleteUserFromDB(userId);
+        if (!deleted) {
+            return sendResponse(res, 404, false, "User not found", "", []);
+        }
+
+        sendResponse(res, 200, true, "User deleted successfully", "", []);
     } catch (error: any) {
-        sendResponse(res, 500, false, 'Failed to delete user', error.message, []);
+        sendResponse(res, 500, false, "Failed to delete user", error.message, []);
     }
 }
