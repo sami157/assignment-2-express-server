@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { createBookingInDB, getAllBookingsFromDB, updateBookingStatusInDB } from './bookings.service';
+import { createBookingInDB, getAllBookingsFromDB, getBookingByIdFromDB, getBookingsByCustomerFromDB, updateBookingStatusInDB } from './bookings.service';
 import sendResponse from '../../config/sendResponse';
 
 export async function createBooking(req: Request, res: Response) {
@@ -12,37 +12,52 @@ export async function createBooking(req: Request, res: Response) {
 }
 
 export async function getAllBookings(req: Request, res: Response) {
-    try {
-        const bookings = await getAllBookingsFromDB();
-        sendResponse(res, 200, true, 'Bookings retrieved successfully', '', bookings);
-    } catch (error: any) {
-        sendResponse(res, 500, false, 'Failed to retrieve bookings', error.message, []);
+  try {
+    const userId = req.user?.id;
+    const role = req.user?.role;
+
+    let bookings;
+
+    if (role === "admin") {
+      bookings = await getAllBookingsFromDB();
+    } else {
+      bookings = await getBookingsByCustomerFromDB(userId);
     }
+
+    sendResponse(res,200,true,"Your bookings retrieved successfully","",bookings);
+  } catch (error: any) {
+    sendResponse(res, 500, false, "Failed to retrieve bookings", error.message, []);
+  }
 }
 
 
+
 export async function updateBooking(req: Request, res: Response) {
-    try {
-        const id = Number(req.params.bookingId);
-        const { status } = req.body;
+  try {
+    const bookingId = Number(req.params.bookingId);
+    const userId = req.user?.id;
+    const role = req.user?.role;
+    const { status } = req.body;
 
-        const updated = await updateBookingStatusInDB(id, status);
+    const booking = await getBookingByIdFromDB(bookingId);
 
-        if (!updated) {
-            return sendResponse(res, 404, false, 'Booking not found', '', []);
-        }
-
-        if (status === 'returned') {
-            return sendResponse(res, 200, true, 'Booking marked as returned. Vehicle is now available', '', updated);
-        }
-
-        if (status === 'cancelled') {
-            return sendResponse(res,200,true,'Booking cancelled successfully','',updated);
-        }
-
-        return sendResponse(res, 400, false, 'Invalid status', '', []);
-
-    } catch (error: any) {
-        sendResponse(res, 500, false, 'Failed to update booking', error.message, []);
+    if (!booking) {
+      return sendResponse(res, 404, false, "Booking not found", "", []);
     }
+
+    if (role === "customer" && booking.customer_id !== userId) {
+      return sendResponse(
+        res,
+        403,
+        false,
+        "Forbidden",
+        "You cannot modify someone else's booking",
+        []
+      );
+    }
+    const updatedBooking = await updateBookingStatusInDB(bookingId, status);
+    sendResponse(res, 200, true, "Booking updated successfully", "", updatedBooking);
+  } catch (error: any) {
+    sendResponse(res, 500, false, "Failed to update booking", error.message, []);
+  }
 }

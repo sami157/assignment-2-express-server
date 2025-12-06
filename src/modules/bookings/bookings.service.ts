@@ -83,6 +83,41 @@ export async function getAllBookingsFromDB() {
     return resultResponse;
 }
 
+export async function getBookingsByCustomerFromDB(customerId: number) {
+    const result = await pool.query(`
+        SELECT 
+            b.id,
+            b.vehicle_id,
+            b.rent_start_date,
+            b.rent_end_date,
+            b.total_price,
+            b.status,
+            v.vehicle_name,
+            v.registration_number,
+            v.type
+        FROM bookings b
+        JOIN vehicles v ON b.vehicle_id = v.id
+        WHERE b.customer_id = $1
+    `, [customerId]);
+
+    const resultResponse = result.rows.map(row => ({
+        id: row.id,
+        vehicle_id: row.vehicle_id,
+        rent_start_date: row.rent_start_date,
+        rent_end_date: row.rent_end_date,
+        total_price: row.total_price,
+        status: row.status,
+        vehicle: {
+            vehicle_name: row.vehicle_name,
+            registration_number: row.registration_number,
+            type: row.type
+        }
+    }));
+
+    return resultResponse;
+}
+
+
 
 export async function updateBookingStatusInDB(id: number, status: string) {
     const bookingRes = await pool.query(
@@ -126,4 +161,12 @@ export async function updateBookingStatusInDB(id: number, status: string) {
     }
 
     return null;
+}
+
+export async function getBookingByIdFromDB(id: number) {
+  const result = await pool.query(
+    `SELECT * FROM bookings WHERE id = $1`,
+    [id]
+  );
+  return result.rows[0];
 }
