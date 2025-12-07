@@ -15,7 +15,7 @@ export async function createVehicle(req: Request, res: Response) {
 export async function getAllVehicles(req: Request, res: Response) {
     try {
         const vehicles = await getAllVehiclesfromDB();
-        sendResponse(res, 200, true, 'Here are all the vehicles', '', vehicles)
+        sendResponse(res, 200, true, vehicles.length > 0 ? 'Here are all the vehicles' : 'No vehicles found', '', vehicles)
     } catch (error: any) {
         sendResponse(res, 500, false, "Error retrieving vehicle list", error.message, [])
     }
@@ -29,7 +29,7 @@ export async function getSingleVehicle(req: Request, res: Response) {
         if (!vehicle) {
             return sendResponse(res, 404, false, "Vehicle not found", '', []);
         }
-        sendResponse(res, 200, true, "Vehicle details fetched successfully", '', vehicle);
+        sendResponse(res, 200, true, "Vehicle retrieved successfully", '', vehicle);
     } catch (error: any) {
         sendResponse(res, 500, false, "Failed fetching vehicle", error.message, []);
     }

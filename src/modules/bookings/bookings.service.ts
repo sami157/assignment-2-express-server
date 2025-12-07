@@ -53,6 +53,7 @@ export async function getAllBookingsFromDB() {
     const result = await pool.query(`
         SELECT 
             b.id,
+            b.customer_id,
             b.vehicle_id,
             b.rent_start_date,
             b.rent_end_date,
@@ -68,6 +69,7 @@ export async function getAllBookingsFromDB() {
 
     const resultResponse = result.rows.map(row => ({
         id: row.id,
+        customer_id: row.customer_id,
         vehicle_id: row.vehicle_id,
         rent_start_date: row.rent_start_date,
         rent_end_date: row.rent_end_date,
